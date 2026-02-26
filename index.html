@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Focus Monitor 🎯</title>
-  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
   <style>
     body {
       text-align: center;
@@ -29,26 +29,19 @@ const statusText = document.getElementById("status");
 let lastAlert = 0;
 
 async function startVideo() {
-  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
   video.srcObject = stream;
 }
 
 async function loadModels() {
-  await faceapi.nets.tinyFaceDetector.loadFromUri('https://justadummyurl.com/models');
-}
-
-// Instead of loading external models, use built-in CDN workaround
-async function loadTinyModel() {
   await faceapi.nets.tinyFaceDetector.loadFromUri(
-    "https://cdn.jsdelivr.net/gh/justadummyurl/face-api-models"
+    "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/"
   );
+  statusText.innerText = "Models Loaded ✅";
+  startVideo();
 }
 
-Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri(
-    "https://cdn.jsdelivr.net/gh/vladmandic/face-api/model"
-  )
-]).then(startVideo);
+loadModels();
 
 video.addEventListener("play", () => {
   setInterval(async () => {
