@@ -26,8 +26,9 @@
 const video = document.getElementById("video");
 const status = document.getElementById("status");
 
-let lastMove = Date.now();
+let lastAlert = 0;
 
+// Start camera
 navigator.mediaDevices.getUserMedia({ video:true })
 .then(stream => {
   video.srcObject = stream;
@@ -37,22 +38,31 @@ navigator.mediaDevices.getUserMedia({ video:true })
   status.innerText = "Camera permission denied ❌";
 });
 
-video.addEventListener("mousemove", () => {
-  lastMove = Date.now();
-});
+// Create louder repeating alarm
+function playAlert(){
+  if(Date.now() - lastAlert > 4000){
+    lastAlert = Date.now();
 
+    let audio = new Audio(
+      "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
+    );
+    audio.volume = 1.0;
+    audio.play();
+  }
+}
+
+// Detect tab inactivity
 setInterval(() => {
-  if (Date.now() - lastMove > 10000) {
-    status.innerText = "Focus on study! 😡";
+  if(document.hidden){
+    status.innerText = "Come back! Study time 😡";
     status.style.color = "red";
-    new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg").play();
-    lastMove = Date.now();
-  } else {
+    playAlert();
+  }
+  else{
     status.innerText = "Focused 😊";
     status.style.color = "lime";
   }
 }, 3000);
 </script>
-
 </body>
 </html>
