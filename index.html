@@ -26,9 +26,10 @@
 const video = document.getElementById("video");
 const status = document.getElementById("status");
 
-let lastAlert = 0;
+let alarmPlaying = false;
+let audio;
 
-// Start camera
+// Start webcam
 navigator.mediaDevices.getUserMedia({ video:true })
 .then(stream => {
   video.srcObject = stream;
@@ -38,31 +39,51 @@ navigator.mediaDevices.getUserMedia({ video:true })
   status.innerText = "Camera permission denied ❌";
 });
 
-// Create louder repeating alarm
-function playAlert(){
-  if(Date.now() - lastAlert > 4000){
-    lastAlert = Date.now();
-
-    let audio = new Audio(
-      "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
-    );
+// Continuous alarm
+function startAlarm(){
+  if(!alarmPlaying){
+    audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
+    audio.loop = true;
     audio.volume = 1.0;
     audio.play();
+    alarmPlaying = true;
   }
 }
 
-// Detect tab inactivity
+function stopAlarm(){
+  if(audio){
+    audio.pause();
+    audio.currentTime = 0;
+  }
+  alarmPlaying = false;
+}
+
+// Detect if tab inactive
 setInterval(() => {
   if(document.hidden){
-    status.innerText = "Come back! Study time 😡";
+    status.innerText = "Focus on study! 😡";
     status.style.color = "red";
-    playAlert();
-  }
-  else{
+    startAlarm();
+  } else {
     status.innerText = "Focused 😊";
     status.style.color = "lime";
+    stopAlarm();
   }
-}, 3000);
+}, 2000);
+
+// Extra: detect mouse inactivity (looking away)
+let lastMove = Date.now();
+
+document.addEventListener("mousemove", () => {
+  lastMove = Date.now();
+});
+
+setInterval(() => {
+  if(Date.now() - lastMove > 8000){
+    startAlarm();
+    status.innerText = "Look at screen! 😡";
+  }
+}, 2000);
 </script>
 </body>
 </html>
